@@ -1,10 +1,28 @@
-import React,{Component} from 'react'
-export default class App extends Component {
-  render(){
+import React, {Component} from 'react'
+// import {Button, message} from 'antd'
+import { HashRouter,BrowserRouter,Switch,Route } from 'react-router-dom'
+
+import Login from './pages/login/login'
+import Admin from './pages/admin/admin'
+/*
+应用根组件
+ */
+class App extends Component {
+
+  // handleClick = () => {
+  //   message.success('成功啦...');
+  // }
+
+  render() {
     return (
-      <div>
-        App
-      </div>
+      <BrowserRouter>
+        <Switch>
+          <Route path="/login" component= {Login} />
+          <Route path="/" component= {Admin} />
+        </Switch>
+      </BrowserRouter>
     )
   }
 }
+
+export default App
