@@ -1,9 +1,14 @@
 import React, { Component } from 'react'
-import { Form, Input, Button ,Icon} from 'antd';
+import { Form, Input, Button ,Icon,message} from 'antd';
+import {Redirect} from 'react-router-dom'
 // import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 import logo from './images/logo.png'
 import './login.less'
+import {reqLogin} from '../../api'
+import storageUtils from '../../utils/storageUtils'
+import memoryUtils from '../../utils/memoryUtils'
+
 
 class Login extends Component {
   handleSubmit = (event)=>{
@@ -16,11 +21,38 @@ class Login extends Component {
     // console.log(values)
     // console.log(username,password)
     // alert('发送登录的Ajax请求')
-    form.validateFields((err,{username,password})=>{
+    form.validateFields(async (err,{username,password})=>{
       if (!err) {
-        console.log(`发ajax请求,username=${username},password=${password}`)
+        // console.log(`发ajax请求,username=${username},password=${password}`)
+        // try{} catch(error){console.log(error)}
+        const result = await reqLogin(username,password)
+        if(result.status === 0){
+          const user = result.data
+          localStorage.setItem('user_key',JSON.stringify(user))
+          storageUtils.saveUser(user)  //这个方法保存user有点慢,所以必须要把user保存到内存里
+          memoryUtils.user = user
+          this.props.history.replace('/')
+          message.success('欢迎您登录成功!') 
+        }else{
+          message.error(result.msg)
+        }
+
+        //不用async await 的写法
+        // reqLogin(username,password)
+        //   .then((response)=>{
+        //     const result = response
+        //     if(result.status === 0){
+        //       this.props.history.replace('/')
+        //       message.success('欢迎您登录成功!')
+        //     }else{
+        //       message.error(result.msg)
+        //     }
+        //   })
+        //   .catch((error)=>{
+        //     console.log(error)
+        //   })        
       } else {
-        // alert('验证失败')
+        console.log('验证失败')
       }
     })
 
@@ -46,6 +78,14 @@ class Login extends Component {
   }
 
   render() {
+    // const user = JSON.parse(localStorage.getItem('user_key') || '{}' )
+    // const user = storageUtils.getUser()
+    const user = memoryUtils.user
+    if(user._id) {
+      // this.props.history.replace('/')  //注意用于回调函数中的路由跳转方法 
+      return <Redirect to='/' />  //用于render渲染时跳转
+    }
+
     const { getFieldDecorator } = this.props.form
     return (
       <div className="login">
